@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "./UserPage.css";
 
 function UserPage() {
   const [users, setUsers] = useState([]);
@@ -10,6 +11,12 @@ function UserPage() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    // Check if any of the fields are empty
+    if (!name || !address || !photo) {
+      alert("All fields are required!");
+      return;
+    }
 
     if (editMode) {
       const newUserList = [...users];
@@ -41,16 +48,63 @@ function UserPage() {
     setEditIndex(index);
   };
 
+  const handleDelete = (index) => {
+    const newUsers = [...users];
+    newUsers.splice(index, 1);
+    setUsers(newUsers);
+  };
+
+  const commonStyle = {
+    fontfamily: "Noto Sans",
+  };
+
+  const formStyle = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "start",
+    gap: "10px",
+    marginBottom: "20px",
+  };
+
+  const inputStyle = {
+    fontfamily: "Noto Sans",
+    width: "200px",
+    padding: "5px",
+    borderRadius: "5px",
+    border: "1px solid #ddd",
+  };
+
+  const buttonStyle = {
+    fontFamily: "Noto Sans",
+  };
+
+  const userStyle = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "start",
+    gap: "10px",
+    border: "1px solid #ddd",
+    borderRadius: "5px",
+    padding: "10px",
+    marginBottom: "10px",
+    img: {
+      width: "50px",
+      height: "50px",
+      objectFit: "cover",
+    },
+  };
+
   return (
-    <div>
+    <div style={{ ...commonStyle, maxWidth: "600px", marginLeft: "20px" }}>
       <h1>{editMode ? "Edit User" : "Create New User"}</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={formStyle}>
         <label>
           Name:
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            style={inputStyle}
           />
         </label>
         <label>
@@ -59,6 +113,7 @@ function UserPage() {
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
+            style={inputStyle}
           />
         </label>
         <label>
@@ -67,18 +122,28 @@ function UserPage() {
             type="text"
             value={photo}
             onChange={(e) => setPhoto(e.target.value)}
+            style={inputStyle}
           />
         </label>
-        <button type="submit">{editMode ? "Update User" : "Add User"}</button>
+        <button type="submit" style={buttonStyle}>
+          {editMode ? "Update User" : "Add User"}
+        </button>
       </form>
 
       <h1>User List</h1>
       {users.map((user, index) => (
-        <div key={index}>
+        <div key={index} style={userStyle}>
           <h2>{user.name}</h2>
           <p>{user.address}</p>
           <img src={user.photo} alt={user.name} />
-          <button onClick={() => handleEdit(index)}>Edit</button>
+          <div>
+            <button onClick={() => handleEdit(index)} style={buttonStyle}>
+              Edit
+            </button>
+            <button onClick={() => handleDelete(index)} style={buttonStyle}>
+              Delete
+            </button>
+          </div>
         </div>
       ))}
     </div>
