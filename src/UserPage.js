@@ -96,7 +96,8 @@ function UserPage() {
 
   return (
     <div style={{ ...commonStyle, maxWidth: "600px", marginLeft: "20px" }}>
-      <h1>{editMode ? "Edit User" : "Create New User"}</h1>
+      <h1>Guest List</h1>
+      <h1>{editMode ? "Edit User" : "Register a new guest"}</h1>
       <form onSubmit={handleSubmit} style={formStyle}>
         <label>
           Name:
@@ -126,11 +127,11 @@ function UserPage() {
           />
         </label>
         <button type="submit" style={buttonStyle}>
-          {editMode ? "Update User" : "Add User"}
+          {editMode ? "Update User" : "Add Guest"}
         </button>
       </form>
 
-      <h1>User List</h1>
+      <h1>List</h1>
       {users.map((user, index) => (
         <div key={index} style={userStyle}>
           <h2>{user.name}</h2>
