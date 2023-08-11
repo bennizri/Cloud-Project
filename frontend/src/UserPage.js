@@ -1,57 +1,108 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "./UserPage.css";
 
 function UserPage() {
   const [users, setUsers] = useState([]);
   const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
+  const [id, setId] = useState("");
   const [photo, setPhoto] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
 
-  const handleSubmit = (event) => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/get-all-guests`);
+      const data = response.data;
+      setUsers(data);
+    } catch (error) {
+      console.error("Error fetching data from the backend:", error);
+    }
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     // Check if any of the fields are empty
-    if (!name || !address || !photo) {
+    if (!name || !id || !photo) {
       alert("All fields are required!");
       return;
     }
 
-    if (editMode) {
-      const newUserList = [...users];
-      newUserList[editIndex] = { name, address, photo };
-      setUsers(newUserList);
+    const user = {
+      name,
+      id,
+      photo,
+    };
+
+    try {
+      if (editMode) {
+        // Updating an existing user
+        const response = await axios.put(
+          `http://localhost:3001/updateGuest`,
+          user
+        );
+        if (response.status === 200) {
+          const updatedUserList = [...users];
+          updatedUserList[editIndex] = response.data; // Assuming the server returns the updated user
+          setUsers(updatedUserList);
+          alert("Guest updated successfully!");
+        } else {
+          alert("Error updating user.");
+        }
+      } else {
+        // Adding a new user
+        const response = await axios.post(
+          `http://localhost:3001/addGuest`,
+          user
+        );
+        setUsers((prevUsers) => [...prevUsers, response.data]);
+        alert("Guest added successfully!");
+      }
+
+      // Reset form and mode
+      setName("");
+      setId("");
+      setPhoto("");
       setEditMode(false);
       setEditIndex(null);
-    } else {
-      const newUser = {
-        name,
-        address,
-        photo,
-      };
-
-      setUsers([...users, newUser]);
+      fetchData();
+    } catch (error) {
+      console.error("There was an error:", error);
+      alert(
+        editMode
+          ? "There was an error updating the user. Please try again."
+          : "There was an error saving the user. Please try again."
+      );
     }
-
-    // Reset form
-    setName("");
-    setAddress("");
-    setPhoto("");
   };
 
   const handleEdit = (index) => {
-    setName(users[index].name);
-    setAddress(users[index].address);
-    setPhoto(users[index].photo);
+    setName(users[index].Name);
+    setId(users[index].ID);
+    setPhoto(users[index].Image);
     setEditMode(true);
     setEditIndex(index);
   };
 
-  const handleDelete = (index) => {
-    const newUsers = [...users];
-    newUsers.splice(index, 1);
-    setUsers(newUsers);
+  const handleDelete = async (index) => {
+    try {
+      console.log(users[index].ID);
+      await axios.delete(
+        `http://localhost:3001/delete-guest/${users[index].ID}`
+      ); // Assuming each user has an id
+      const newUsers = [...users];
+      newUsers.splice(index, 1);
+      setUsers(newUsers);
+      alert("Guest deleted successfully!");
+    } catch (error) {
+      console.error("There was an error deleting the user:", error);
+      alert("There was an error deleting the user. Please try again.");
+    }
   };
 
   const commonStyle = {
@@ -109,11 +160,11 @@ function UserPage() {
           />
         </label>
         <label>
-          Address:
+          Id:
           <input
             type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            value={id}
+            onChange={(e) => setId(e.target.value)}
             style={inputStyle}
           />
         </label>
@@ -134,9 +185,9 @@ function UserPage() {
       <h1>List</h1>
       {users.map((user, index) => (
         <div key={index} style={userStyle}>
-          <h2>{user.name}</h2>
-          <p>{user.address}</p>
-          <img src={user.photo} alt={user.name} />
+          <h2>{user.Name}</h2>
+          <p>{user.ID}</p>
+          <img src={user.Image} alt={user.name} />
           <div>
             <button onClick={() => handleEdit(index)} style={buttonStyle}>
               Edit
