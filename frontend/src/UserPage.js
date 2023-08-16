@@ -9,6 +9,7 @@ function UserPage() {
   const [photo, setPhoto] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
+  const REACT_APP_URL = process.env.REACT_APP_URL;
 
   useEffect(() => {
     fetchData();
@@ -16,7 +17,8 @@ function UserPage() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/get-all-guests`);
+      console.log(process.env.REACT_APP_URL);
+      const response = await axios.get(`${REACT_APP_URL}/get-all-guests`);
       const data = response.data;
       setUsers(data);
     } catch (error) {
@@ -42,10 +44,7 @@ function UserPage() {
     try {
       if (editMode) {
         // Updating an existing user
-        const response = await axios.put(
-          `http://localhost:3001/updateGuest`,
-          user
-        );
+        const response = await axios.put(`${REACT_APP_URL}/updateGuest`, user);
         if (response.status === 200) {
           const updatedUserList = [...users];
           updatedUserList[editIndex] = response.data; // Assuming the server returns the updated user
@@ -56,10 +55,7 @@ function UserPage() {
         }
       } else {
         // Adding a new user
-        const response = await axios.post(
-          `http://localhost:3001/addGuest`,
-          user
-        );
+        const response = await axios.post(`${REACT_APP_URL}/addGuest`, user);
         setUsers((prevUsers) => [...prevUsers, response.data]);
         alert("Guest added successfully!");
       }
@@ -92,9 +88,7 @@ function UserPage() {
   const handleDelete = async (index) => {
     try {
       console.log(users[index].ID);
-      await axios.delete(
-        `http://localhost:3001/delete-guest/${users[index].ID}`
-      ); // Assuming each user has an id
+      await axios.delete(`${REACT_APP_URL}/delete-guest/${users[index].ID}`); // Assuming each user has an id
       const newUsers = [...users];
       newUsers.splice(index, 1);
       setUsers(newUsers);
